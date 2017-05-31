@@ -50,6 +50,15 @@ rock = color_thresh(warped, (90, 90, 0), (255, 255,72))
  obstacles = color_thresh(warped, (0, 0, 0), (110, 110, 110))
 ```
   ![alt text][image3] ![alt text][image5]
+  
+  To better deal with the value 0 in RGB, I use the greater-than-and-equal sign in `color_thresh()` like below:
+ 
+  ```
+  img[:,:,1] >= rgb_min_thresh[1]
+  ```
+  
+ But it introduces another problem that I will include unnecessary balck point for obstacle image if I do the transforming first.
+ As a result, I choose to threshold the original image before the transforming.
 
 #### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 And here are two example videos I made after changing the `process_image()`! 
