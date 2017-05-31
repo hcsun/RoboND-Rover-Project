@@ -1,7 +1,4 @@
 ## Project: Search and Sample Return
-### Writeup Template: You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
 
 
 **The goals / steps of this project are the following:**  
@@ -26,6 +23,8 @@
 [image2]: ./calibration_images/example_grid1.jpg
 [image3]: ./calibration_images/example_rock1.jpg 
 
+[image5]: ./output/example_obstacle.jpg 
+
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
@@ -38,9 +37,19 @@ You're reading it!
 
 ### Notebook Analysis
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
-Here is an example of how to include an image in your writeup.
+I change the `color_thresh()` to set up the acceptable maximum RGB value. Here is an example output of thresholded rock image using the code below:
+```
+rock = color_thresh(warped, (90, 90, 0), (255, 255,72))
+```
 
-![alt text][image1]
+ ![alt text][image3] ![alt text][image4]
+ 
+ And  for the obstacles:
+
+```
+ obstacles = color_thresh(warped, (0, 0, 0), (110, 110, 110))
+```
+  ![alt text][image3] ![alt text][image5]
 
 #### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 And another! 
