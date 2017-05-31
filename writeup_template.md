@@ -22,8 +22,8 @@
 [image1]: ./misc/rover_image.jpg
 [image2]: ./calibration_images/example_grid1.jpg
 [image3]: ./calibration_images/example_rock1.jpg 
-
-[image5]: ./output/example_obstacle.jpg 
+[image4]: ./output/example_rock1.jpg 
+[image5]: ./output/example_obstacle1.jpg 
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -52,9 +52,11 @@ rock = color_thresh(warped, (90, 90, 0), (255, 255,72))
   ![alt text][image3] ![alt text][image5]
 
 #### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
-And another! 
+And here are two example videos I made after changing the `process_image()`! 
 
-![alt text][image2]
+* [Test mapping video](./output/test_mapping.mp4)
+* [My test mapping video](./output/my_test_mapping.mp4)
+
 ### Autonomous Navigation and Mapping
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
