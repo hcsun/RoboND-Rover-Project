@@ -13,9 +13,13 @@ def decision_step(Rover):
     # Check if we have vision data to make decisions with
     if Rover.nav_angles is not None:
         # Check for Rover.mode status
-        if Rover.mode == 'forward': 
+        if Rover.mode == 'forward':
+            if len(Rover.rock_angles >= Rover.go_sample):
+                Rover.steer = np.clip(np.mean(Rover.rock_angles * 180/np.pi), -15, 15)
+                Rover.mode = 'saw_sample'
+
             # Check the extent of navigable terrain
-            if len(Rover.nav_angles) >= Rover.stop_forward:  
+            elif len(Rover.nav_angles) >= Rover.stop_forward:  
                 # If mode is forward, navigable terrain looks good 
                 # and velocity is below max, then throttle 
                 if Rover.vel < Rover.max_vel:
@@ -60,12 +64,38 @@ def decision_step(Rover):
                     # Set steer to mean angle
                     Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
                     Rover.mode = 'forward'
+
+        #When rock sample is saw, try to approach
+        elif Rover.mode == 'saw_sample':
+            if len(Rover.rock_angles >= Rover.go_sample):
+                if not Rover.near_sample:
+                    Rover.steer = np.clip(np.mean(Rover.rock_angles * 180/np.pi), -15, 15)
+
+                    if Rover.vel > 5.0:
+                        Rover.throttle = 0
+                        Rover.brake = Rover.brake_set
+                    else:
+                        Rover.throttle = Rover.throttle_set
+                        Rover.brake = 0
+                else:
+                    Rover.throttle = 0
+                    Rover.brake = Rover.brake_set
+
+            elif not Rover.near_sample and not Rover.picking_up:
+                Rover.throttle = Rover.throttle_set
+                Rover.brake = 0
+                Rover.steer = 0
+                Rover.mode = 'forward'
+
     # Just to make the rover do something 
     # even if no modifications have been made to the code
     else:
         Rover.throttle = Rover.throttle_set
         Rover.steer = 0
         Rover.brake = 0
+
+    if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
+        Rover.send_pickup = True
 
     return Rover
 
