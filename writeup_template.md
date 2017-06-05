@@ -69,7 +69,7 @@ And here are two example videos I made after changing the `process_image()`!
 ### Autonomous Navigation and Mapping
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
-
+##### perception_step()
 The `perception_step()` (line 85 to line 163) contains the perception pipeline which is developed from jupyter notebook. The generall steps to process navigable/obstacle/rock images include:
 1. Perspect transform
 2. Color threshold
@@ -84,14 +84,78 @@ As metioned above, the `color_thresh()` is changed to accept value 0 in RGB and 
     obstacles = perspect_transform(obstacles, source, destination)
 ~~~
 
+##### decision_step()
+The original logic inside the `decision_step()`  is enough to pass the basic rubics, but I want to try picking up some rock samples. So I set up a new state in the decision for seeing the rock sample and approach the sample slowly until I get near:
+~~~
+#When rock sample is saw, try to approach
+elif Rover.mode == 'saw_sample':
+    if len(Rover.rock_angles >= Rover.go_sample):
+        if not Rover.near_sample:
+            Rover.steer = np.clip(np.mean(Rover.rock_angles * 180/np.pi), -Rover.camera_vision, Rover.camera_vision)
+
+            # Approaching slowly
+            if Rover.vel > 5.0:
+                Rover.throttle = 0
+                Rover.brake = Rover.brake_set
+            else:
+                Rover.throttle = Rover.throttle_set
+                Rover.brake = 0
+        else:
+            Rover.throttle = 0
+            Rover.brake = Rover.brake_set
+
+    elif not Rover.near_sample and not Rover.picking_up:
+        Rover.throttle = Rover.throttle_set
+        Rover.brake = 0
+        Rover.steer = 0
+        Rover.mode = 'forward'
+~~~
+The rover will pick the sample after then:
+~~~
+if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
+	Rover.send_pickup = True
+~~~
+
+In some cases, I find out that the rover get stuck after picking up the rock sample. As a result, I introudce a 90-degree-turn in stop mode for struggling out these cases. The main idea is first to detect if the rover is being stuck for a long time:
+~~~
+# Detect if we are stuck in one place, try to struggle out by 90 degree turn in stop mode.
+if Rover.vel <= Rover.stop_velocity_thresh / 2 and Rover.throttle_set == Rover.throttle_set:
+    if Rover.stuck_count < Rover.stuck_thres:
+        Rover.stuck_count += 1
+    else:
+        # Set mode to "stop" and hit the brakes!
+        Rover.throttle = 0
+        # Set brake to stored brake value
+        Rover.brake = Rover.brake_set
+        Rover.steer = 0
+        Rover.stuck_count = 0
+        Rover.mode = 'stop'
+~~~
+And then the rover will try to turn around in stop mode:
+~~~
+def is_rotated_90(now_yaw, from_yaw):
+    rotated = now_yaw - from_yaw
+    if rotated >= 0:
+        return rotated >= 90.0
+    else:
+        return rotated + 360.0 >= 90
+        
+if len(Rover.nav_angles) < Rover.go_forward or not is_rotated_90(Rover.yaw, Rover.stop_init_yaw):
+    Rover.throttle = 0
+    # Release the brake to allow turning
+    Rover.brake = 0
+    # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
+    Rover.steer = -15 # Could be more clever here about which way to turn
+~~~
+
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
 **Note: running the simulator with different choices of resolution and graphics quality may produce different results, particularly on different machines!  Make a note of your simulator settings (resolution and graphics quality set on launch) and frames per second (FPS output to terminal by `drive_rover.py`) in your writeup when you submit the project so your reviewer can reproduce your results.**
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+The simulator in my environment has following configuration:
 
+* Resolution: 1024 X 768
+* Quality: Good
+* FPS: 17 - 20
 
-
-![alt text][image3]
-
-
+For most of the scenarios, my rover can steer quite well and it can pick up several rock samples. But I find out that my rover will circle around a big plains in some cases. I think I can introduce a bias toward the obstacle on the left to sovle this, and this should give me the ability to navigate the whole map.
