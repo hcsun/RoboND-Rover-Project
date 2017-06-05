@@ -70,6 +70,19 @@ And here are two example videos I made after changing the `process_image()`!
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
 
+The `perception_step()` (line 85 to line 163) contains the perception pipeline which is developed from jupyter notebook. The generall steps to process navigable/obstacle/rock images include:
+1. Perspect transform
+2. Color threshold
+3. Establish rover coordinate
+4. Establish world coordinate
+5. Highlight the sampled pixels in world map
+6. Derive navigable angle
+
+As metioned above, the `color_thresh()` is changed to accept value 0 in RGB and there is problem dealing with pure black points. As a result, I do a color threshold berfore perspect transform for obstacle images.
+~~~
+    obstacles = color_thresh(Rover.img, (0, 0, 0), (110, 110, 110))
+    obstacles = perspect_transform(obstacles, source, destination)
+~~~
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
