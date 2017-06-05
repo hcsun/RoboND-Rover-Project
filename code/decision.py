@@ -9,13 +9,16 @@ def decision_step(Rover):
     # Here you're all set up with some basic functionality but you'll need to
     # improve on this decision tree to do a good job of navigating autonomously!
 
+    stop_velocity_thresh = 0.2
+    camera_vision = 15
     # Example:
     # Check if we have vision data to make decisions with
     if Rover.nav_angles is not None:
         # Check for Rover.mode status
         if Rover.mode == 'forward':
             if len(Rover.rock_angles >= Rover.go_sample):
-                Rover.steer = np.clip(np.mean(Rover.rock_angles * 180/np.pi), -15, 15)
+                # Steering to rock sample and clipped to the camera vision range.
+                Rover.steer = np.clip(np.mean(Rover.rock_angles * 180/np.pi), -camera_vision, camera_vision)
                 Rover.mode = 'saw_sample'
 
             # Check the extent of navigable terrain
@@ -29,7 +32,7 @@ def decision_step(Rover):
                     Rover.throttle = 0
                 Rover.brake = 0
                 # Set steering to average angle clipped to the range +/- 15
-                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
+                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -camera_vision, camera_vision)
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
             elif len(Rover.nav_angles) < Rover.stop_forward:
                     # Set mode to "stop" and hit the brakes!
@@ -42,12 +45,12 @@ def decision_step(Rover):
         # If we're already in "stop" mode then make different decisions
         elif Rover.mode == 'stop':
             # If we're in stop mode but still moving keep braking
-            if Rover.vel > 0.2:
+            if Rover.vel > stop_velocity_thresh:
                 Rover.throttle = 0
                 Rover.brake = Rover.brake_set
                 Rover.steer = 0
             # If we're not moving (vel < 0.2) then do something else
-            elif Rover.vel <= 0.2:
+            elif Rover.vel <= stop_velocity_thresh:
                 # Now we're stopped and we have vision data to see if there's a path forward
                 if len(Rover.nav_angles) < Rover.go_forward:
                     Rover.throttle = 0
@@ -62,20 +65,22 @@ def decision_step(Rover):
                     # Release the brake
                     Rover.brake = 0
                     # Set steer to mean angle
-                    Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
+                    Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -camera_vision, camera_vision)
                     Rover.mode = 'forward'
 
         #When rock sample is saw, try to approach
         elif Rover.mode == 'saw_sample':
             if len(Rover.rock_angles >= Rover.go_sample):
                 if not Rover.near_sample:
-                    Rover.steer = np.clip(np.mean(Rover.rock_angles * 180/np.pi), -15, 15)
+                    Rover.steer = np.clip(np.mean(Rover.rock_angles * 180/np.pi), -camera_vision, camera_vision)
 
+                    # Approaching slowly
                     if Rover.vel > 5.0:
                         Rover.throttle = 0
                         Rover.brake = Rover.brake_set
                     else:
                         Rover.throttle = Rover.throttle_set
+                        Rover.steer = 0
                         Rover.brake = 0
                 else:
                     Rover.throttle = 0
