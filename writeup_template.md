@@ -1,7 +1,7 @@
-## Project: Search and Sample Return
+# Project: Search and Sample Return
 
 
-**The goals / steps of this project are the following:**  
+## The goals / steps of this project are the following:  
 
 **Training / Calibration**  
 
@@ -26,9 +26,8 @@
 [image5]: ./output/example_obstacle1.jpg 
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
----
 ### Writeup / README
 
 #### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
@@ -60,7 +59,7 @@ rock = color_thresh(warped, (90, 90, 0), (255, 255,72))
  But it introduces another problem that I will include unnecessary balck point for obstacle image if I do the transforming first.
  As a result, I choose to threshold the original image before the transforming.
 
-#### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
+#### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 And here are two example videos I made after changing the `process_image()`! 
 
 * [Test mapping video](./output/test_mapping.mp4)
